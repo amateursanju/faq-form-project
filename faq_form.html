@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Credential Capture</title>
+    <style>
+        /* CSS: Styles for the Pop-up (Modal) and Button */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .modal {
+            /* Initially hidden */
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4); /* Black background with opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .required-star {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="faqButton" style="padding: 10px 20px; font-size: 18px; cursor: pointer;">
+        FAQ
+    </button>
+
+    <div id="credentialModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Submit Your Query Credentials</h2>
+            
+            <form id="credentialForm" target="hiddenIframe" method="POST" 
+                  action="https://script.google.com/macros/s/AKfycbw0mLi9GBJRAkljdcbiHdhYTw5hJisikbaESZsvUTFZQTrSnWaWRer37mMuEeUVvpM/exec">
+            
+                <div class="form-group">
+                    <label for="name">Name <span class="required-star">*</span></label>
+                    <input type="text" id="name" name="Name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mobile">Mobile No. <span class="required-star">*</span></label>
+                    <input type="tel" id="mobile" name="Mobile No." pattern="\d{10}" 
+                           maxlength="10" required 
+                           title="Mobile Number must be exactly 10 digits">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Id <span class="required-star">*</span></label>
+                    <input type="email" id="email" name="Email Id" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address (Optional)</label>
+                    <input type="text" id="address" name="Address">
+                </div>
+                
+                <div class="form-group">
+                    <label for="state">State <span class="required-star">*</span></label>
+                    <input type="text" id="state" name="State" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pincode">Pin Code <span class="required-star">*</span></label>
+                    <input type="text" id="pincode" name="Pin Code" pattern="\d{6}" 
+                           maxlength="6" required 
+                           title="Pin Code must be exactly 6 digits">
+                </div>
+
+                <button type="submit" id="submitBtn" disabled>Submit</button>
+            </form>
+            
+            <iframe name="hiddenIframe" style="display: none;"></iframe>
+            
+            <p id="thankYouMsg" style="color: green; font-weight: bold; display: none;">
+                Thank you! Your details have been submitted.
+            </p>
+
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('credentialModal');
+        const btn = document.getElementById('faqButton');
+        const span = document.getElementsByClassName('close')[0];
+        const form = document.getElementById('credentialForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const thankYouMsg = document.getElementById('thankYouMsg');
+
+        // All required inputs for validation check
+        const requiredInputs = [
+            document.getElementById('name'),
+            document.getElementById('mobile'),
+            document.getElementById('email'),
+            document.getElementById('state'),
+            document.getElementById('pincode')
+        ];
+
+        // Function to check if all inputs are valid
+        function checkValidation() {
+            let isValid = true;
+            
+            // 1. Check if all required fields are filled
+            requiredInputs.forEach(input => {
+                if (!input.value) {
+                    isValid = false;
+                }
+            });
+
+            // 2. Check Mobile No. (10 digits)
+            if (document.getElementById('mobile').value.length !== 10) {
+                isValid = false;
+            }
+
+            // 3. Check Pin Code (6 digits)
+            if (document.getElementById('pincode').value.length !== 6) {
+                isValid = false;
+            }
+
+            // 4. Check Email Id (contains '@')
+            if (!document.getElementById('email').value.includes('@')) {
+                isValid = false;
+            }
+
+            // Enable or disable the button based on validation result
+            submitBtn.disabled = !isValid;
+        }
+
+        // Attach the validation check to keyup (user typing) events on all required fields
+        requiredInputs.forEach(input => {
+            input.addEventListener('keyup', checkValidation);
+        });
+        
+        // --- Modal/Pop-up Control ---
+
+        // Open the modal when the FAQ button is clicked
+        btn.onclick = function() {
+            modal.style.display = 'block';
+            thankYouMsg.style.display = 'none'; // Hide thank you message on open
+            checkValidation(); // Run initial check when form opens
+        }
+
+        // Close the modal when the 'x' is clicked
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        // Close the modal when the user clicks anywhere outside of it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // --- Form Submission Handling ---
+
+        form.onsubmit = function(event) {
+            // Prevent the default form submission (page refresh)
+            event.preventDefault(); 
+            
+            // Show a temporary message/spinner (optional: for non-technical users, simple is better)
+            submitBtn.textContent = 'Submitting...'; 
+            submitBtn.disabled = true;
+
+            // Submit the form data using the fetch API (modern method)
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                // Assuming successful submission (even if the script throws a soft error)
+                // In a real application, you'd check the response, but for Google Apps Script, this is simpler.
+                
+                // Reset the form and show success message
+                form.reset();
+                thankYouMsg.style.display = 'block';
+                
+                // Reset button text/state
+                submitBtn.textContent = 'Submit';
+                submitBtn.disabled = true; // Disabled again after submission
+                
+                // Automatically close the modal after 3 seconds
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 3000); 
+                
+            })
+            .catch(error => {
+                // Simple error handling
+                alert('An error occurred during submission. Please try again.');
+                submitBtn.textContent = 'Submit';
+                checkValidation(); // Re-enable if possible
+            });
+        };
+        
+    </script>
+</body>
+</html>
