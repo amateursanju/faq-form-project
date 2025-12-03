@@ -3,67 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ Credential Capture</title>
+    <title>Interactive FAQ Hub</title>
     <style>
-        /* CSS: Styles for the Pop-up (Modal) and Button */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-        }
-        .modal {
-            /* Initially hidden */
-            display: none; 
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4); /* Black background with opacity */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto; /* 10% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-            max-width: 500px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        /* Base Styles for Modals */
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 700px; border-radius: 8px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); position: relative; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .required-star { color: red; }
+        
+        /* Styles for the Accordion FAQ Hub */
+        #faqHubModal h2 { color: #333; margin-bottom: 20px; }
+        .faq-category { 
+            background-color: #f7f7f7; 
+            color: #444; 
+            cursor: pointer; 
+            padding: 18px; 
+            width: 100%; 
+            border: none; 
+            text-align: left; 
+            outline: none; 
+            font-size: 16px; 
+            transition: 0.4s;
+            margin-top: 5px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-weight: bold;
         }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .form-group {
-            margin-bottom: 15px;
+        .faq-category:hover { background-color: #ddd; }
+        .faq-content {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
             text-align: left;
+            border: 1px solid #ddd;
+            border-top: none;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input, .form-group select {
-            width: 95%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .required-star {
-            color: red;
-        }
+        .faq-item { margin-bottom: 15px; }
+        .faq-item strong { color: #007bff; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -74,67 +59,107 @@
 
     <div id="credentialModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Submit Your Query Credentials</h2>
+            <span class="close" id="closeCredential">&times;</span>
+            <h2>Submit Your Credentials to Access FAQs</h2>
             
             <form id="credentialForm" target="hiddenIframe" method="POST" 
                   action="https://script.google.com/macros/s/AKfycbw0mLi9GBJRAkljdcbiHdhYTw5hJisikbaESZsvUTFZQTrSnWaWRer37mMuEeUVvpM/exec">
             
-                <div class="form-group">
-                    <label for="name">Name <span class="required-star">*</span></label>
-                    <input type="text" id="name" name="Name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="mobile">Mobile No. <span class="required-star">*</span></label>
-                    <input type="tel" id="mobile" name="Mobile No." pattern="\d{10}" 
-                           maxlength="10" required 
-                           title="Mobile Number must be exactly 10 digits">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email Id <span class="required-star">*</span></label>
-                    <input type="email" id="email" name="Email Id" required>
-                </div>
+                <div class="form-group"><label for="name">Name <span class="required-star">*</span></label>
+                    <input type="text" id="name" name="Name" required></div>
+                <div class="form-group"><label for="mobile">Mobile No. <span class="required-star">*</span></label>
+                    <input type="tel" id="mobile" name="Mobile No." pattern="\d{10}" maxlength="10" required 
+                           title="Mobile Number must be exactly 10 digits"></div>
+                <div class="form-group"><label for="email">Email Id <span class="required-star">*</span></label>
+                    <input type="email" id="email" name="Email Id" required></div>
+                <div class="form-group"><label for="address">Address (Optional)</label>
+                    <input type="text" id="address" name="Address"></div>
+                <div class="form-group"><label for="state">State <span class="required-star">*</span></label>
+                    <input type="text" id="state" name="State" required></div>
+                <div class="form-group"><label for="pincode">Pin Code <span class="required-star">*</span></label>
+                    <input type="text" id="pincode" name="Pin Code" pattern="\d{6}" maxlength="6" required 
+                           title="Pin Code must be exactly 6 digits"></div>
 
-                <div class="form-group">
-                    <label for="address">Address (Optional)</label>
-                    <input type="text" id="address" name="Address">
-                </div>
-                
-                <div class="form-group">
-                    <label for="state">State <span class="required-star">*</span></label>
-                    <input type="text" id="state" name="State" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="pincode">Pin Code <span class="required-star">*</span></label>
-                    <input type="text" id="pincode" name="Pin Code" pattern="\d{6}" 
-                           maxlength="6" required 
-                           title="Pin Code must be exactly 6 digits">
-                </div>
-
-                <button type="submit" id="submitBtn" disabled>Submit</button>
+                <button type="submit" id="submitBtn" disabled style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Submit
+                </button>
             </form>
-            
             <iframe name="hiddenIframe" style="display: none;"></iframe>
-            
-            <p id="thankYouMsg" style="color: green; font-weight: bold; display: none;">
-                Thank you! Your details have been submitted.
-            </p>
+        </div>
+    </div>
+    
+    <div id="faqHubModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeFAQ">&times;</span>
+            <h2>DAITM Frequently Asked Questions</h2>
+
+            <button class="faq-category" data-target="courses">1. Courses <span>&#9660;</span></button>
+            <div class="faq-content" id="courses">
+                <div class="faq-item"><strong>Q: What B.Tech specializations are offered?</strong><p>A: We offer specializations in Computer Science, Mechanical, Civil, and Electronics & Communication Engineering.</p></div>
+                <div class="faq-item"><strong>Q: Do you offer any integrated BBA/MBA programs?</strong><p>A: Yes, we have a 5-year integrated program covering both BBA and MBA degrees.</p></div>
+                <div class="faq-item"><strong>Q: Are the courses AICTE approved?</strong><p>A: All our engineering and management programs are fully approved by the All India Council for Technical Education (AICTE).</p></div>
+                <div class="faq-item"><strong>Q: How frequently is the curriculum updated?</strong><p>A: The curriculum is reviewed and updated every two years in consultation with industry experts.</p></div>
+                <div class="faq-item"><strong>Q: Is there flexibility to switch courses in the first year?</strong><p>A: Course switching is permitted only during the first two weeks of the semester, subject to availability and merit.</p></div>
+            </div>
+
+            <button class="faq-category" data-target="admission">2. Admission Procedures <span>&#9660;</span></button>
+            <div class="faq-content" id="admission">
+                <div class="faq-item"><strong>Q: What is the minimum eligibility for B.Tech admission?</strong><p>A: A minimum of 60% marks in 10+2 with Physics, Chemistry, and Mathematics (PCM) is required.</p></div>
+                <div class="faq-item"><strong>Q: Is an entrance exam mandatory for all courses?</strong><p>A: Yes, admission to B.Tech requires a valid score in the state-level entrance exam or JEE Mains.</p></div>
+                <div class="faq-item"><strong>Q: When does the application process usually start?</strong><p>A: The application window typically opens in May and closes by the end of June.</p></div>
+                <div class="faq-item"><strong>Q: What documents are required for counseling?</strong><p>A: You need 10th and 12th mark sheets, entrance exam scorecard, domicile certificate, and five passport-sized photos.</p></div>
+                <div class="faq-item"><strong>Q: Do you offer direct admission based on merit?</strong><p>A: A limited number of management seats are available for direct admission based on 10+2 merit, without an entrance exam.</p></div>
+            </div>
+
+            <button class="faq-category" data-target="placement">3. Placement <span>&#9660;</span></button>
+            <div class="faq-content" id="placement">
+                <div class="faq-item"><strong>Q: What is the average placement package offered?</strong><p>A: The average placement package for the last academic year was INR 4.5 Lakhs per annum (LPA).</p></div>
+                <div class="faq-item"><strong>Q: What is the highest salary package achieved?</strong><p>A: The highest package recorded in the last batch was INR 18 LPA, secured by a Computer Science student.</p></div>
+                <div class="faq-item"><strong>Q: Which top companies recruit from DAITM?</strong><p>A: Major recruiters include TCS, Infosys, Wipro, L&T, and various tech startups.</p></div>
+                <div class="faq-item"><strong>Q: Does the college offer placement training?</strong><p>A: Yes, we have dedicated soft skills training, technical aptitude coaching, and mock interview sessions starting from the 3rd semester.</p></div>
+                <div class="faq-item"><strong>Q: What is the overall placement percentage?</strong><p>A: We consistently maintain a placement rate of over 85% for eligible students.</p></div>
+            </div>
+
+            <button class="faq-category" data-target="infrastructure">4. Infrastructure <span>&#9660;</span></button>
+            <div class="faq-content" id="infrastructure">
+                <div class="faq-item"><strong>Q: Are the classrooms air-conditioned?</strong><p>A: All seminar halls and final-year classrooms are air-conditioned, with standard ventilation in others.</p></div>
+                <div class="faq-item"><strong>Q: Is Wi-Fi available throughout the campus?</strong><p>A: Yes, 24/7 high-speed Wi-Fi is available in all academic blocks, hostels, and common areas.</p></div>
+                <div class="faq-item"><strong>Q: How extensive is the central library?</strong><p>A: The library spans two floors and contains over 50,000 volumes, national/international journals, and a digital subscription library.</p></div>
+                <div class="faq-item"><strong>Q: Are there dedicated labs for R&D?</strong><p>A: Yes, the college features specialized labs for robotics, cloud computing, and advanced manufacturing research.</p></div>
+                <div class="faq-item"><strong>Q: What sports facilities are available?</strong><p>A: We have a large cricket and football ground, a basketball court, and indoor facilities for table tennis and badminton.</p></div>
+            </div>
+
+            <button class="faq-category" data-target="life">5. Life At DAITM <span>&#9660;</span></button>
+            <div class="faq-content" id="life">
+                <div class="faq-item"><strong>Q: Are hostels compulsory for out-of-town students?</strong><p>A: Hostels are optional, but highly recommended for all out-of-town students.</p></div>
+                <div class="faq-item"><strong>Q: How many cultural fests are held annually?</strong><p>A: We host two major annual fests: 'TechNova' (technical) and 'Kalakriti' (cultural), along with several smaller departmental events.</p></div>
+                <div class="faq-item"><strong>Q: What is the student-teacher ratio?</strong><p>A: We maintain a healthy student-teacher ratio of 15:1 to ensure personalized attention.</p></div>
+                <div class="faq-item"><strong>Q: Are there different student clubs?</strong><p>A: Yes, we have over 15 active clubs, including robotics, coding, photography, and literature clubs.</p></div>
+                <div class="faq-item"><strong>Q: What medical facilities are on campus?</strong><p>A: We have a dedicated on-campus health center with a full-time nurse and an on-call doctor available 24 hours.</p></div>
+            </div>
+
+            <button class="faq-category" data-target="fees">6. Fees & Enrollment <span>&#9660;</span></button>
+            <div class="faq-content" id="fees">
+                <div class="faq-item"><strong>Q: What is the total tuition fee for B.Tech?</strong><p>A: The current annual tuition fee is INR 1,20,000, excluding hostel and mess charges.</p></div>
+                <div class="faq-item"><strong>Q: Are there any scholarship schemes available?</strong><p>A: Yes, merit-based scholarships are available for students with a ranking above 5000 in the entrance exam.</p></div>
+                <div class="faq-item"><strong>Q: Is there an installment payment option for fees?</strong><p>A: Fees can be paid in two installments per academic year, one at the start of each semester.</p></div>
+                <div class="faq-item"><strong>Q: What is the one-time enrollment fee?</strong><p>A: There is a non-refundable one-time enrollment and security deposit fee of INR 15,000.</p></div>
+                <div class="faq-item"><strong>Q: How do I access my official fee receipt?</strong><p>A: All official fee receipts are issued digitally and can be downloaded from the student portal within 48 hours of payment.</p></div>
+            </div>
 
         </div>
     </div>
 
     <script>
-        const modal = document.getElementById('credentialModal');
-        const btn = document.getElementById('faqButton');
-        const span = document.getElementsByClassName('close')[0];
-        const form = document.getElementById('credentialForm');
+        const credentialModal = document.getElementById('credentialModal');
+        const faqHubModal = document.getElementById('faqHubModal');
+        const faqButton = document.getElementById('faqButton');
+        const credentialForm = document.getElementById('credentialForm');
         const submitBtn = document.getElementById('submitBtn');
-        const thankYouMsg = document.getElementById('thankYouMsg');
+        const closeCredential = document.getElementById('closeCredential');
+        const closeFAQ = document.getElementById('closeFAQ');
 
-        // All required inputs for validation check
+        // All required inputs for form validation (Same as before)
         const requiredInputs = [
             document.getElementById('name'),
             document.getElementById('mobile'),
@@ -143,103 +168,96 @@
             document.getElementById('pincode')
         ];
 
-        // Function to check if all inputs are valid
+        // --- Core Validation Function (Same as before) ---
         function checkValidation() {
             let isValid = true;
-            
-            // 1. Check if all required fields are filled
             requiredInputs.forEach(input => {
-                if (!input.value) {
-                    isValid = false;
-                }
+                if (!input.value) isValid = false;
             });
-
-            // 2. Check Mobile No. (10 digits)
-            if (document.getElementById('mobile').value.length !== 10) {
-                isValid = false;
-            }
-
-            // 3. Check Pin Code (6 digits)
-            if (document.getElementById('pincode').value.length !== 6) {
-                isValid = false;
-            }
-
-            // 4. Check Email Id (contains '@')
-            if (!document.getElementById('email').value.includes('@')) {
-                isValid = false;
-            }
-
-            // Enable or disable the button based on validation result
+            if (document.getElementById('mobile').value.length !== 10) isValid = false;
+            if (document.getElementById('pincode').value.length !== 6) isValid = false;
+            if (!document.getElementById('email').value.includes('@')) isValid = false;
+            
             submitBtn.disabled = !isValid;
         }
-
-        // Attach the validation check to keyup (user typing) events on all required fields
-        requiredInputs.forEach(input => {
-            input.addEventListener('keyup', checkValidation);
-        });
+        requiredInputs.forEach(input => input.addEventListener('keyup', checkValidation));
         
-        // --- Modal/Pop-up Control ---
-
-        // Open the modal when the FAQ button is clicked
-        btn.onclick = function() {
-            modal.style.display = 'block';
-            thankYouMsg.style.display = 'none'; // Hide thank you message on open
-            checkValidation(); // Run initial check when form opens
+        // --- Modal Control ---
+        faqButton.onclick = function() {
+            credentialModal.style.display = 'block';
+            checkValidation();
         }
-
-        // Close the modal when the 'x' is clicked
-        span.onclick = function() {
-            modal.style.display = 'none';
+        closeCredential.onclick = function() {
+            credentialModal.style.display = 'none';
         }
-
-        // Close the modal when the user clicks anywhere outside of it
+        closeFAQ.onclick = function() {
+            faqHubModal.style.display = 'none';
+        }
         window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            if (event.target == credentialModal) {
+                credentialModal.style.display = 'none';
+            } else if (event.target == faqHubModal) {
+                faqHubModal.style.display = 'none';
             }
         }
-        
-        // --- Form Submission Handling ---
 
-        form.onsubmit = function(event) {
-            // Prevent the default form submission (page refresh)
+        // --- Form Submission Handling (UPDATED) ---
+        credentialForm.onsubmit = function(event) {
             event.preventDefault(); 
-            
-            // Show a temporary message/spinner (optional: for non-technical users, simple is better)
             submitBtn.textContent = 'Submitting...'; 
             submitBtn.disabled = true;
 
-            // Submit the form data using the fetch API (modern method)
-            fetch(form.action, {
+            fetch(credentialForm.action, {
                 method: 'POST',
-                body: new FormData(form)
+                body: new FormData(credentialForm)
             })
             .then(response => {
-                // Assuming successful submission (even if the script throws a soft error)
-                // In a real application, you'd check the response, but for Google Apps Script, this is simpler.
+                // Success! Close credential form and open FAQ hub
+                credentialModal.style.display = 'none';
+                faqHubModal.style.display = 'block'; 
                 
-                // Reset the form and show success message
-                form.reset();
-                thankYouMsg.style.display = 'block';
-                
-                // Reset button text/state
+                // Reset form state for next use
+                credentialForm.reset();
                 submitBtn.textContent = 'Submit';
-                submitBtn.disabled = true; // Disabled again after submission
-                
-                // Automatically close the modal after 3 seconds
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 3000); 
-                
+                submitBtn.disabled = true; 
             })
             .catch(error => {
-                // Simple error handling
                 alert('An error occurred during submission. Please try again.');
                 submitBtn.textContent = 'Submit';
-                checkValidation(); // Re-enable if possible
+                checkValidation();
             });
         };
         
+        // --- Accordion Logic for FAQ Hub ---
+        const faqCategories = document.querySelectorAll('.faq-category');
+        
+        faqCategories.forEach(category => {
+            category.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const content = document.getElementById(targetId);
+                const arrow = this.querySelector('span');
+                
+                // Close all other open sections
+                faqCategories.forEach(otherCategory => {
+                    const otherContent = document.getElementById(otherCategory.getAttribute('data-target'));
+                    const otherArrow = otherCategory.querySelector('span');
+
+                    if (otherContent !== content && otherContent.style.maxHeight) {
+                        otherContent.style.maxHeight = null;
+                        otherArrow.innerHTML = '&#9660;'; // Down arrow
+                    }
+                });
+                
+                // Toggle the current section
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    arrow.innerHTML = '&#9660;'; // Down arrow
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    arrow.innerHTML = '&#9650;'; // Up arrow
+                }
+            });
+        });
     </script>
 </body>
 </html>
