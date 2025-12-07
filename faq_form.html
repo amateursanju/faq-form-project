@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive FAQ Hub</title>
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
     <style>
         /* Base Styles for Modals */
         body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
@@ -15,40 +18,80 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
         .required-star { color: red; }
-        
-        /* Styles for the Accordion FAQ Hub */
-        #faqHubModal h2 { color: #333; margin-bottom: 20px; }
-        .faq-category { 
-            background-color: #f7f7f7; 
-            color: #444; 
-            cursor: pointer; 
-            padding: 18px; 
-            width: 100%; 
-            border: none; 
-            text-align: left; 
-            outline: none; 
-            font-size: 16px; 
-            transition: 0.4s;
-            margin-top: 5px;
-            border-bottom: 1px solid #ddd;
+        .invalid-input { border: 2px solid red !important; }
+
+        /* Styles for the New Interactive FAQ Hub */
+        #faqHubModal .content-wrapper {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        #faqHubModal .category-menu {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+        }
+        #faqHubModal .question-list-container {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        .category-button { 
+            background-color: #f0f0f0; 
+            color: #333; 
+            padding: 12px; 
+            margin-bottom: 5px; 
+            border: 1px solid #ccc; 
+            cursor: pointer; 
+            text-align: left; 
             font-weight: bold;
+            transition: background-color 0.2s;
         }
-        .faq-category:hover { background-color: #ddd; }
-        .faq-content {
-            padding: 0 18px;
-            background-color: white;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.2s ease-out;
+        .category-button:hover { background-color: #ddd; }
+        
+        /* Styles for Questions (Tier 2) and Answer Box (Tier 3) */
+        .question-list { display: none; margin-bottom: 15px; } /* Initially hidden */
+        .question-list a { 
+            display: block; 
+            padding: 8px 0; 
+            color: #007bff; 
+            text-decoration: none; 
+            border-bottom: 1px dotted #eee;
+        }
+        .question-list a:hover { text-decoration: underline; color: #0056b3; }
+        
+        /* Answer Box Styling (Highlighted) */
+        #answerDisplay {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #007bff; /* Attention Drawing Border */
+            background-color: #e6f3ff; /* Highlighted Background (Light Blue) */
+            border-radius: 8px;
+            margin-top: 15px;
             text-align: left;
-            border: 1px solid #ddd;
-            border-top: none;
+            font-size: 1.1em;
+            font-weight: 500;
         }
-        .faq-item { margin-bottom: 15px; }
-        .faq-item strong { color: #007bff; display: block; margin-bottom: 5px; }
+
+        /* Download Brochure Button Styling */
+        #downloadBrochure {
+            display: block;
+            margin: 20px auto 0;
+            padding: 15px 30px;
+            background-color: #007bff; /* Blue Background */
+            color: red; /* Red Text */
+            font-weight: bold;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; 
+            transition: background-color 0.2s;
+        }
+        #downloadBrochure:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -67,18 +110,29 @@
             
                 <div class="form-group"><label for="name">Name <span class="required-star">*</span></label>
                     <input type="text" id="name" name="Name" required></div>
+                
                 <div class="form-group"><label for="mobile">Mobile No. <span class="required-star">*</span></label>
-                    <input type="tel" id="mobile" name="Mobile No." pattern="\d{10}" maxlength="10" required 
+                    <input type="tel" id="mobile" name="Mobile No." maxlength="10" required 
                            title="Mobile Number must be exactly 10 digits"></div>
-                <div class="form-group"><label for="email">Email Id <span class="required-star">*</span></label>
-                    <input type="email" id="email" name="Email Id" required></div>
+                           
+                <div class="form-group"><label for="email">Email Id</label>
+                    <input type="email" id="email" name="Email Id"></div>
+                    
                 <div class="form-group"><label for="address">Address (Optional)</label>
                     <input type="text" id="address" name="Address"></div>
-                <div class="form-group"><label for="state">State <span class="required-star">*</span></label>
-                    <input type="text" id="state" name="State" required></div>
-                <div class="form-group"><label for="pincode">Pin Code <span class="required-star">*</span></label>
-                    <input type="text" id="pincode" name="Pin Code" pattern="\d{6}" maxlength="6" required 
+                    
+                <div class="form-group"><label for="state">State</label>
+                    <input type="text" id="state" name="State"></div>
+                    
+                <div class="form-group"><label for="pincode">Pin Code</label>
+                    <input type="text" id="pincode" name="Pin Code" maxlength="6" 
                            title="Pin Code must be exactly 6 digits"></div>
+
+                <div class="form-group" style="text-align: center;">
+                    <div class="g-recaptcha" 
+                         data-sitekey="6LcJGCQsAAAAAMA1bll47_PkRSQEVtspxBP1LLOl"
+                         data-callback="recaptchaCallback"></div>
+                </div>
 
                 <button type="submit" id="submitBtn" disabled style="padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Submit
@@ -93,58 +147,114 @@
             <span class="close" id="closeFAQ">&times;</span>
             <h2>DAITM Frequently Asked Questions</h2>
 
-            <button class="faq-category" data-target="courses">1. Courses <span>&#9660;</span></button>
-            <div class="faq-content" id="courses">
-                <div class="faq-item"><strong>Q: What B.Tech specializations are offered?</strong><p>A: We offer specializations in Computer Science, Mechanical, Civil, and Electronics & Communication Engineering.</p></div>
-                <div class="faq-item"><strong>Q: Do you offer any integrated BBA/MBA programs?</strong><p>A: Yes, we have a 5-year integrated program covering both BBA and MBA degrees.</p></div>
-                <div class="faq-item"><strong>Q: Are the courses AICTE approved?</strong><p>A: All our engineering and management programs are fully approved by the All India Council for Technical Education (AICTE).</p></div>
-                <div class="faq-item"><strong>Q: How frequently is the curriculum updated?</strong><p>A: The curriculum is reviewed and updated every two years in consultation with industry experts.</p></div>
-                <div class="faq-item"><strong>Q: Is there flexibility to switch courses in the first year?</strong><p>A: Course switching is permitted only during the first two weeks of the semester, subject to availability and merit.</p></div>
-            </div>
+            <div class="content-wrapper">
+                
+                <div class="category-menu">
+                    <button class="category-button" data-category="courses">Courses @ DAITM</button>
+                    <button class="category-button" data-category="admission">Admission @ DAITM</button>
+                    <button class="category-button" data-category="placement">Placements @ DAITM</button>
+                    <button class="category-button" data-category="infrastructure">Infrastructure @ DAITM</button>
+                    <button class="category-button" data-category="life">Life @ DAITM</button>
+                    
+                    <a id="downloadBrochure" href="https://drive.google.com/drive/u/0/folders/1LFPQG8U6d4spTw64Ixdqvi5o19ZyQ5oj" target="_blank">
+                        Download Brochure
+                    </a>
+                </div>
 
-            <button class="faq-category" data-target="admission">2. Admission Procedures <span>&#9660;</span></button>
-            <div class="faq-content" id="admission">
-                <div class="faq-item"><strong>Q: What is the minimum eligibility for B.Tech admission?</strong><p>A: A minimum of 60% marks in 10+2 with Physics, Chemistry, and Mathematics (PCM) is required.</p></div>
-                <div class="faq-item"><strong>Q: Is an entrance exam mandatory for all courses?</strong><p>A: Yes, admission to B.Tech requires a valid score in the state-level entrance exam or JEE Mains.</p></div>
-                <div class="faq-item"><strong>Q: When does the application process usually start?</strong><p>A: The application window typically opens in May and closes by the end of June.</p></div>
-                <div class="faq-item"><strong>Q: What documents are required for counseling?</strong><p>A: You need 10th and 12th mark sheets, entrance exam scorecard, domicile certificate, and five passport-sized photos.</p></div>
-                <div class="faq-item"><strong>Q: Do you offer direct admission based on merit?</strong><p>A: A limited number of management seats are available for direct admission based on 10+2 merit, without an entrance exam.</p></div>
-            </div>
+                <div class="question-list-container">
+                    
+                    <h3>Select a Section and then a Question</h3>
+                    
+                    <div id="courses-list" class="question-list">
+                        <a href="#" data-answer="ans-c1">What courses are offered by DAITM</a>
+                        <a href="#" data-answer="ans-c2">Are all the program at DAITM approved by AICTE?</a>
+                        <a href="#" data-answer="ans-c3">What does the BBA program at DAITM focus on?</a>
+                        <a href="#" data-answer="ans-c4">What does the BCA program at DAITM focus on?</a>
+                        <a href="#" data-answer="ans-c5">What does the BBA in Hospital Management at DAITM focus on?</a>
+                        <a href="#" data-answer="ans-c6">What does the B.Sc in Medical Laboratory Technology (MLT) involve?</a>
+                        <a href="#" data-answer="ans-c7">What is the duration of these courses?</a>
+                        <a href="#" data-answer="ans-c8">Can DAITM courses prepare students for higher studies or specialized careers?</a>
+                    </div>
+                    
+                    <div id="admission-list" class="question-list">
+                        <a href="#" data-answer="ans-a1">How many seats are available for BBA at DAITM?</a>
+                        <a href="#" data-answer="ans-a2">How many seats are there for B.Sc (MLT) at DAITM?</a>
+                        <a href="#" data-answer="ans-a3">What are the eligibility requirements</a>
+                        <a href="#" data-answer="ans-a4">What is the process to apply for courses at DAITM?</a>
+                        <a href="#" data-answer="ans-a5">Are admissions at DAITM merit-based or entrance-exam based?</a>
+                        <a href="#" data-answer="ans-a6">Does DAITM also offer postgraduate admissions?</a>
+                    </div>
+                    
+                    <div id="placement-list" class="question-list">
+                        <a href="#" data-answer="ans-p1">Does DAITM have a placement or training & placement cell?</a>
+                        <a href="#" data-answer="ans-p2">Which kinds of companies visit DAITM for placements?</a>
+                        <a href="#" data-answer="ans-p3">How has placement performance changed over recent years?</a>
+                        <a href="#" data-answer="ans-p4">Do students get internship opportunities at DAITM?</a>
+                        <a href="#" data-answer="ans-p5">Does DAITM provide pre-placement training (e.g., soft skills, technical workshops)?</a>
+                        <a href="#" data-answer="ans-p6">Are placement opportunities available for all courses including BSc (MLT)?</a>
+                    </div>
+                    
+                    <div id="infrastructure-list" class="question-list">
+                        <a href="#" data-answer="ans-i1">What kinds of academic infrastructure does DAITM have?</a>
+                        <a href="#" data-answer="ans-i2">Does DAITM have computer and technology facilities?</a>
+                        <a href="#" data-answer="ans-i3">Are there facilities for extra-curricular and recreational activities?</a>
+                        <a href="#" data-answer="ans-i4">Is there medical support available on campus?</a>
+                        <a href="#" data-answer="ans-i5">Does the campus support seminars, group work, and interactive events?</a>
+                        <a href="#" data-answer="ans-i6">How large is the DAITM campus, and is it designed for a comfortable student life?</a>
+                    </div>
 
-            <button class="faq-category" data-target="placement">3. Placement <span>&#9660;</span></button>
-            <div class="faq-content" id="placement">
-                <div class="faq-item"><strong>Q: What is the average placement package offered?</strong><p>A: The average placement package for the last academic year was INR 4.5 Lakhs per annum (LPA).</p></div>
-                <div class="faq-item"><strong>Q: What is the highest salary package achieved?</strong><p>A: The highest package recorded in the last batch was INR 18 LPA, secured by a Computer Science student.</p></div>
-                <div class="faq-item"><strong>Q: Which top companies recruit from DAITM?</strong><p>A: Major recruiters include TCS, Infosys, Wipro, L&T, and various tech startups.</p></div>
-                <div class="faq-item"><strong>Q: Does the college offer placement training?</strong><p>A: Yes, we have dedicated soft skills training, technical aptitude coaching, and mock interview sessions starting from the 3rd semester.</p></div>
-                <div class="faq-item"><strong>Q: What is the overall placement percentage?</strong><p>A: We consistently maintain a placement rate of over 85% for eligible students.</p></div>
+                    <div id="life-list" class="question-list">
+                        <a href="#" data-answer="ans-l1">Does DAITM offer a supportive learning environment with experienced faculty?</a>
+                        <a href="#" data-answer="ans-l2">Are there social and co-curricular activities at DAITM?</a>
+                        <a href="#" data-answer="ans-l3">Is campus life at DAITM comfortable and student-friendly?</a>
+                        <a href="#" data-answer="ans-l4">Does DAITM give exposure to real-life projects and industry practices?</a>
+                        <a href="#" data-answer="ans-l5">Does DAITM support holistic development beyond academics?</a>
+                        <a href="#" data-answer="ans-l6">Is DAITM well suited for students aiming for both higher studies and industry jobs?</a>
+                    </div>
+                    
+                    <div id="answerDisplay">
+                        Welcome! Please select a section on the left, and then click on a question from the list above to see the answer displayed here.
+                    </div>
+                </div>
             </div>
+            
+            <div id="answerStorage" style="display: none;">
+                <p id="ans-c1">DAITM offers the following full-time courses: BBA, BCA, BBA in Hospital Management, B.Sc in Medical Laboratory Technology (MLT). For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c2">Yes, the BBA, BCA and BBA in Hospital Management are courses approved by AICTE. Also, BBA, BCA, BBA in Hospital Management and B.Sc in Medical Laboratory Technology (MLT) is affiliated to Maulana Abul Kalam Azad University of Technology. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c3">The BBA program provides a foundation in key business disciplines — such as marketing, finance and HR — along with practical exposure via projects, internships, workshops, and industry interactions. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c4">The BCA program helps in building a foundation in computer science & IT – Programming Languages, Problem Solving and Analytical skills along with practical exposure to labs, projects, workshops via internships and industry interactions. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c5">The BBA in Hospital Management helps in understanding how hospitals and healthcare organizations operate - hospital administration, patient-care coordination, and healthcare services work. Helps develop skills in administrative and managerial roles in healthcare industries through exposures in projects, internships and industry interactions. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c6">The B.Sc MLT program offers education in clinical laboratory techniques, diagnostic procedures, and the use of advanced medical equipment — preparing students for roles in medical labs and patient-care diagnostics. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c7">All these honours courses are for a duration of 4 years and each year is divided into 2 semesters. A Student will have to clear all the 8 semesters to complete the education in DAITM. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-c8">Yes. For example, the BBA, BCA, BBA in Hospital Management and B.Sc in Medical Lab technology offers a solid base to all those who would like to take up higher studies like MBA, MCA, MHA, M.Sc in Medical Lab technology. For further details please visit www.daitm.org.in.</p>
 
-            <button class="faq-category" data-target="infrastructure">4. Infrastructure <span>&#9660;</span></button>
-            <div class="faq-content" id="infrastructure">
-                <div class="faq-item"><strong>Q: Are the classrooms air-conditioned?</strong><p>A: All seminar halls and final-year classrooms are air-conditioned, with standard ventilation in others.</p></div>
-                <div class="faq-item"><strong>Q: Is Wi-Fi available throughout the campus?</strong><p>A: Yes, 24/7 high-speed Wi-Fi is available in all academic blocks, hostels, and common areas.</p></div>
-                <div class="faq-item"><strong>Q: How extensive is the central library?</strong><p>A: The library spans two floors and contains over 50,000 volumes, national/international journals, and a digital subscription library.</p></div>
-                <div class="faq-item"><strong>Q: Are there dedicated labs for R&D?</strong><p>A: Yes, the college features specialized labs for robotics, cloud computing, and advanced manufacturing research.</p></div>
-                <div class="faq-item"><strong>Q: What sports facilities are available?</strong><p>A: We have a large cricket and football ground, a basketball court, and indoor facilities for table tennis and badminton.</p></div>
-            </div>
+                <p id="ans-a1">BBA, BCA each has 120 intakes and BBA in Hospital Management has 60 intakes. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-a2">There are 30 intakes for the B.Sc in Medical Laboratory Technology program. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-a3">Admissions take place annually as per affiliating University specified guidelines. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-a4">Interested candidates should fill the application form available on DAITM’s official website and complete the required payment to secure admission. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-a5">Admissions are generally merit-based (based on qualifying exam organized by MAKAUT). For further details please visit www.daitm.org.in.</p>
+                <p id="ans-a6">No, DAITM does not provide postgraduate admissions. However, the course curriculum, classes, infrastructure and events prepare them in a way so that pursuing Postgraduate later becomes easy. For further details please visit www.daitm.org.in.</p>
 
-            <button class="faq-category" data-target="life">5. Life At DAITM <span>&#9660;</span></button>
-            <div class="faq-content" id="life">
-                <div class="faq-item"><strong>Q: Are hostels compulsory for out-of-town students?</strong><p>A: Hostels are optional, but highly recommended for all out-of-town students.</p></div>
-                <div class="faq-item"><strong>Q: How many cultural fests are held annually?</strong><p>A: We host two major annual fests: 'TechNova' (technical) and 'Kalakriti' (cultural), along with several smaller departmental events.</p></div>
-                <div class="faq-item"><strong>Q: What is the student-teacher ratio?</strong><p>A: We maintain a healthy student-teacher ratio of 15:1 to ensure personalized attention.</p></div>
-                <div class="faq-item"><strong>Q: Are there different student clubs?</strong><p>A: Yes, we have over 15 active clubs, including robotics, coding, photography, and literature clubs.</p></div>
-                <div class="faq-item"><strong>Q: What medical facilities are on campus?</strong><p>A: We have a dedicated on-campus health center with a full-time nurse and an on-call doctor available 24 hours.</p></div>
-            </div>
+                <p id="ans-p1">Yes — there is a dedicated Training & Placement Cell at DAITM, which handles placements, internships, career guidance, grooming, placement drives and related activities. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-p2">Companies from sectors such as IT, consulting, retail, banking/finance (BFSI), and healthcare — including reputed firms like Deloitte, TCS, Amazon, Cognizant, Accenture, Wipro, Infosys and also hospitals and healthcare providers - Fortis, Bhagirathi Neotia, Iris, etc for relevant courses. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-p3">Placement rates have reportedly grown — placement percentages have improved, and number of visiting companies and student placements have increased. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-p4">Yes — DAITM strives to provide internships across streams (IT, finance, healthcare, retail) and many students convert internships into full-time jobs (PPOs). For further details please visit www.daitm.org.in.</p>
+                <p id="ans-p5">Yes — DAITM conducts workshops, seminars, mock interviews, personality/communication training, and industry-oriented training in emerging areas like Data Analytics, Cloud computing, Cybersecurity, AI and softskill. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-p6">Yes — even students from BSc MLT program become eligible for placements after completion of their course. For further details please visit www.daitm.org.in.</p>
 
-            <button class="faq-category" data-target="fees">6. Fees & Enrollment <span>&#9660;</span></button>
-            <div class="faq-content" id="fees">
-                <div class="faq-item"><strong>Q: What is the total tuition fee for B.Tech?</strong><p>A: The current annual tuition fee is INR 1,20,000, excluding hostel and mess charges.</p></div>
-                <div class="faq-item"><strong>Q: Are there any scholarship schemes available?</strong><p>A: Yes, merit-based scholarships are available for students with a ranking above 5000 in the entrance exam.</p></div>
-                <div class="faq-item"><strong>Q: Is there an installment payment option for fees?</strong><p>A: Fees can be paid in two installments per academic year, one at the start of each semester.</p></div>
-                <div class="faq-item"><strong>Q: What is the one-time enrollment fee?</strong><p>A: There is a non-refundable one-time enrollment and security deposit fee of INR 15,000.</p></div>
-                <div class="faq-item"><strong>Q: How do I access my official fee receipt?</strong><p>A: All official fee receipts are issued digitally and can be downloaded from the student portal within 48 hours of payment.</p></div>
+                <p id="ans-i1">DAITM has modern classrooms, with smart projectors, well-equipped IT labs, MLT labs, a well stocked Library with digital infrastructure and a cutting edge Language Lab. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-i2">Yes — there are well-equipped IT labs (1:1) and a campus-wide Wi-Fi network to support digital learning. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-i3">Yes. DAITM provides recreation/common rooms (separate for boys and girls), a cafeteria, indoor sports facilities (carrom, badminton, table tennis, chess), and other recreational activities that helps develop the students in their formative years. The institute organizes annual Fest, Sports and various club activities. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-i4">Yes — a medical room is available for basic health needs and first aid for students and staff. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-i5">Yes — there are common areas suitable for group work, seminars, training programs, and events. It has a state-of-the art seminar hall with 180+ seating capacity which helps to plan and organise internal as well as external events. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-i6">The area to explore spans about 60,000 sq ft spread in a 6 storey campus designed with modern amenities — labs, classrooms, seminar hall, Wi-Fi, recreation — to support both academic and extracurricular life. For further details please visit www.daitm.org.in.</p>
+
+                <p id="ans-l1">Yes — DAITM has highly experienced and dedicated faculty, creating a wholesome academic environment fostering both professional competence and personal growth. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-l2">Yes — DAITM has industry-oriented training programs, social activities, outreach programs and workshops beyond academics. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-l3">Yes — with facilities like common rooms, cafeteria, recreation rooms, seminar hall, sports options, and a well-maintained campus, DAITM supports a balanced student life. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-l4">Yes — through industry interactions, internships, seminars, outreach programs and workshops embedded in the courses. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-l5">Yes — the institute emphasises not only academic learning but also leadership, ethics, professional skills, and readiness for global market demands. For further details please visit www.daitm.org.in.</p>
+                <p id="ans-l6">Yes — with solid academic courses, practical exposure, placement and internship opportunities, and support for both career and higher studies, DAITM caters to diverse student goals. For further details please visit www.daitm.org.in.</p>
             </div>
 
         </div>
@@ -156,41 +266,42 @@
         const faqButton = document.getElementById('faqButton');
         const credentialForm = document.getElementById('credentialForm');
         const submitBtn = document.getElementById('submitBtn');
-        const closeCredential = document.getElementById('closeCredential');
-        const closeFAQ = document.getElementById('closeFAQ');
+        const nameInput = document.getElementById('name');
+        const mobileInput = document.getElementById('mobile');
+        let recaptchaIsChecked = false; 
 
-        // All required inputs for form validation (Same as before)
-        const requiredInputs = [
-            document.getElementById('name'),
-            document.getElementById('mobile'),
-            document.getElementById('email'),
-            document.getElementById('state'),
-            document.getElementById('pincode')
-        ];
-
-        // --- Core Validation Function (Same as before) ---
-        function checkValidation() {
-            let isValid = true;
-            requiredInputs.forEach(input => {
-                if (!input.value) isValid = false;
-            });
-            if (document.getElementById('mobile').value.length !== 10) isValid = false;
-            if (document.getElementById('pincode').value.length !== 6) isValid = false;
-            if (!document.getElementById('email').value.includes('@')) isValid = false;
-            
-            submitBtn.disabled = !isValid;
+        // CRITICAL: Function called by Google when CAPTCHA is checked
+        function recaptchaCallback() {
+            recaptchaIsChecked = true;
+            checkValidation();
         }
-        requiredInputs.forEach(input => input.addEventListener('keyup', checkValidation));
+
+        // --- Core Validation Function (Includes reCAPTCHA Check) ---
+        function checkValidation() {
+            let isNameValid = nameInput.value.trim() !== '';
+            let isMobileValid = mobileInput.value.length === 10;
+            
+            if (mobileInput.value.length > 0 && mobileInput.value.length !== 10) {
+                mobileInput.classList.add('invalid-input');
+            } else {
+                mobileInput.classList.remove('invalid-input');
+            }
+            
+            // Submit button is enabled ONLY if Name is filled, Mobile is 10 digits, AND reCAPTCHA is checked
+            submitBtn.disabled = !(isNameValid && isMobileValid && recaptchaIsChecked);
+        }
+
+        [nameInput, mobileInput].forEach(input => input.addEventListener('keyup', checkValidation));
         
         // --- Modal Control ---
         faqButton.onclick = function() {
             credentialModal.style.display = 'block';
             checkValidation();
         }
-        closeCredential.onclick = function() {
+        document.getElementById('closeCredential').onclick = function() {
             credentialModal.style.display = 'none';
         }
-        closeFAQ.onclick = function() {
+        document.getElementById('closeFAQ').onclick = function() {
             faqHubModal.style.display = 'none';
         }
         window.onclick = function(event) {
@@ -201,61 +312,72 @@
             }
         }
 
-        // --- Form Submission Handling (UPDATED) ---
+        // --- Form Submission Handling ---
         credentialForm.onsubmit = function(event) {
             event.preventDefault(); 
-            submitBtn.textContent = 'Submitting...'; 
+            submitBtn.textContent = 'Verifying...'; 
             submitBtn.disabled = true;
 
             fetch(credentialForm.action, {
                 method: 'POST',
                 body: new FormData(credentialForm)
             })
-            .then(response => {
-                // Success! Close credential form and open FAQ hub
-                credentialModal.style.display = 'none';
-                faqHubModal.style.display = 'block'; 
+            .then(response => response.json()) 
+            .then(data => {
+                if (data.result === 'success') {
+                    // Success! Close credential form and open FAQ hub
+                    credentialModal.style.display = 'none';
+                    faqHubModal.style.display = 'block'; 
+                    credentialForm.reset();
+                } else {
+                    // Handle failure (e.g., CAPTCHA failed on server side)
+                    alert('Submission Failed: ' + data.message || 'Verification error. Please try checking reCAPTCHA again.');
+                }
                 
                 // Reset form state for next use
-                credentialForm.reset();
                 submitBtn.textContent = 'Submit';
-                submitBtn.disabled = true; 
+                grecaptcha.reset(); 
+                recaptchaIsChecked = false;
+                checkValidation(); 
             })
             .catch(error => {
-                alert('An error occurred during submission. Please try again.');
+                alert('An error occurred during network communication. Please try again.');
                 submitBtn.textContent = 'Submit';
                 checkValidation();
             });
         };
         
-        // --- Accordion Logic for FAQ Hub ---
-        const faqCategories = document.querySelectorAll('.faq-category');
-        
-        faqCategories.forEach(category => {
-            category.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
-                const content = document.getElementById(targetId);
-                const arrow = this.querySelector('span');
-                
-                // Close all other open sections
-                faqCategories.forEach(otherCategory => {
-                    const otherContent = document.getElementById(otherCategory.getAttribute('data-target'));
-                    const otherArrow = otherCategory.querySelector('span');
+        // --- NEW FAQ Navigation Logic ---
+        const categoryButtons = document.querySelectorAll('.category-button');
+        const answerDisplay = document.getElementById('answerDisplay');
 
-                    if (otherContent !== content && otherContent.style.maxHeight) {
-                        otherContent.style.maxHeight = null;
-                        otherArrow.innerHTML = '&#9660;'; // Down arrow
-                    }
-                });
+        // 1. Logic for showing Question List (Tier 1 -> Tier 2)
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetCategory = this.getAttribute('data-category');
                 
-                // Toggle the current section
-                if (content.style.maxHeight) {
-                    content.style.maxHeight = null;
-                    arrow.innerHTML = '&#9660;'; // Down arrow
-                } else {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                    arrow.innerHTML = '&#9650;'; // Up arrow
-                }
+                // Hide all question lists
+                document.querySelectorAll('.question-list').forEach(list => {
+                    list.style.display = 'none';
+                });
+
+                // Show the specific question list
+                document.getElementById(targetCategory + '-list').style.display = 'block';
+                
+                // Clear the answer display box
+                answerDisplay.innerHTML = 'Click a question above to see the answer displayed here.';
+            });
+        });
+
+        // 2. Logic for showing Answer (Tier 2 -> Tier 3)
+        document.querySelectorAll('.question-list a').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); 
+                const answerId = this.getAttribute('data-answer');
+                const answerText = document.getElementById(answerId).innerHTML;
+                
+                // Flash the answer in the highlighted box
+                answerDisplay.innerHTML = `<strong>Answer:</strong> ${answerText}`;
             });
         });
     </script>
